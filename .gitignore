@@ -5,7 +5,7 @@ __pycache__/
 *.pyo
 *.pyd
 ./*.xlsx
-./*.csv
+/layout_template.csv
 *.json
 bundle.txt
 bundle.py

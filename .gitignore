@@ -1,0 +1,22 @@
+# ---- 基本的なPython関連 ----
+# Pythonが生成するキャッシュや一時ファイル
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+./*.xlsx
+./*.csv
+*.json
+bundle.txt
+bundle.py
+memo.md
+
+# pipでインストールされるパッケージ
+venv/
+env/
+.venv/
+
+.env
+
+# 出力ファイル類
+outputs/

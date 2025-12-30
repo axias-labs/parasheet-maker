@@ -111,14 +111,17 @@ def markdown_to_sheets(md_text: str):
     return sheets
 
 
-def try_format_json_object_list(text: str):
+def try_format_json_value(text: str):
     """
-    text が「JSONとして有効な、オブジェクト(dict)の配列」([{}, {} ...]) の場合だけ、
-    インデント付きの複数行JSONに整形して返す。
-    それ以外（JSONでない / dict配列でない）は None を返す。
+    text が JSON として有効な dict または list の場合、インデント付きJSONに整形して返す。
+    それ以外は None。
     """
     s = str(text).strip()
-    if not (s.startswith("[") and s.endswith("]")):
+    if not s:
+        return None
+
+    # JSONっぽい見た目だけ対象
+    if not ((s.startswith("{") and s.endswith("}")) or (s.startswith("[") and s.endswith("]"))):
         return None
 
     try:
@@ -126,15 +129,10 @@ def try_format_json_object_list(text: str):
     except Exception:
         return None
 
-    if not isinstance(parsed, list):
+    if not isinstance(parsed, (dict, list)):
         return None
 
-    if not parsed or not all(isinstance(x, dict) for x in parsed):
-        return None
-
-    pretty = json.dumps(parsed, ensure_ascii=False, indent=2)
-    return pretty
-
+    return json.dumps(parsed, ensure_ascii=False, indent=2)
 
 def try_format_string_list(text: str):
     """
@@ -210,7 +208,7 @@ def write_excel_from_markdown(md_text: str, excel_path: Path):
                         cell.value = formatted
                         cell.alignment = Alignment(wrap_text=True, vertical="top")
                     else:
-                        formatted = try_format_json_object_list(cell.value)
+                        formatted = try_format_json_value(cell.value)
                         if formatted is not None:
                             cell.value = formatted
                             cell.alignment = Alignment(wrap_text=True, vertical="top")

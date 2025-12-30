@@ -136,6 +136,29 @@ def try_format_json_object_list(text: str):
     return pretty
 
 
+def try_format_string_list(text: str):
+    """
+    text が JSON として有効な list[str] の場合、
+    [] を外して、要素を改行区切りで返す
+    """
+    s = str(text).strip()
+    if not (s.startswith("[") and s.endswith("]")):
+        return None
+
+    try:
+        parsed = json.loads(s)
+    except Exception:
+        return None
+
+    if not isinstance(parsed, list):
+        return None
+
+    if not parsed or not all(isinstance(x, str) for x in parsed):
+        return None
+
+    return "\n".join(parsed)
+
+
 def write_excel_from_markdown(md_text: str, excel_path: Path):
     sheets = markdown_to_sheets(md_text)
 
@@ -182,10 +205,15 @@ def write_excel_from_markdown(md_text: str, excel_path: Path):
                     # ここから下は「通常セル」
                     cell.alignment = Alignment(vertical="top", wrap_text=True)
 
-                    formatted = try_format_json_object_list(cell.value)
+                    formatted = try_format_string_list(cell.value)
                     if formatted is not None:
                         cell.value = formatted
                         cell.alignment = Alignment(wrap_text=True, vertical="top")
+                    else:
+                        formatted = try_format_json_object_list(cell.value)
+                        if formatted is not None:
+                            cell.value = formatted
+                            cell.alignment = Alignment(wrap_text=True, vertical="top")
 
                     cell.border = border
 
